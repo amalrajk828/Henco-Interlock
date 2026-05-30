@@ -19,6 +19,8 @@ const InquiryManagement = () => {
   const [adminComments, setAdminComments] = useState('');
   const [currentStatus, setCurrentStatus] = useState('');
   const [updating, setUpdating] = useState(false);
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   const fetchInquiries = async () => {
     setLoading(true);
@@ -77,23 +79,34 @@ const InquiryManagement = () => {
     }
   };
 
-  // Dispatch downloads inside the active browser frame
-  const handleExport = (format) => {
-    const token = JSON.parse(localStorage.getItem('henco_admin_user'))?.token;
-    if (!token) return;
-    
-    const downloadUrl = `${api.defaults.baseURL}/inquiries/export/${format}?token=${token}`;
-    
-    // Create temporary link and trigger browser downloader
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.target = '_blank';
-    link.setAttribute('download', `henco-inquiries.${format === 'excel' ? 'xlsx' : 'pdf'}`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    setSuccess(`Inquiries summary report downloaded as ${format === 'excel' ? 'Excel' : 'PDF'}`);
+  // Dispatch secure blob downloads inside the active browser frame
+  const handleExport = async (format) => {
+    setError('');
+    setSuccess('');
+    if (format === 'excel') setExportingExcel(true);
+    if (format === 'pdf') setExportingPdf(true);
+
+    try {
+      const url = format === 'excel' ? '/inquiries/export' : '/inquiries/export/pdf';
+      const response = await api.get(url, { responseType: 'blob' });
+      
+      const blob = new Blob([response.data], {
+        type: response.headers['content-type'] || 'application/octet-stream'
+      });
+      const link = document.createElement('a');
+      link.href = window.URL.createObjectURL(blob);
+      link.setAttribute('download', `henco-inquiries-${Date.now()}.${format === 'excel' ? 'xlsx' : 'pdf'}`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setSuccess(`Inquiries summary report successfully downloaded as ${format === 'excel' ? 'Excel' : 'PDF'}`);
+    } catch (err) {
+      setError(`Failed to export inquiries: ` + err.message);
+    } finally {
+      if (format === 'excel') setExportingExcel(false);
+      if (format === 'pdf') setExportingPdf(false);
+    }
   };
 
   return (
@@ -111,19 +124,29 @@ const InquiryManagement = () => {
         <div className="flex items-center space-x-3.5 shrink-0 self-start sm:self-auto">
           <button
             onClick={() => handleExport('excel')}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-emerald-600 hover:text-white dark:bg-dark-800 dark:hover:bg-emerald-650 text-gray-700 dark:text-gray-300 font-bold text-xs uppercase tracking-wider rounded-xl transition-smooth flex items-center space-x-1.5"
+            disabled={exportingExcel || exportingPdf}
+            className="px-4 py-2.5 bg-slate-100 hover:bg-emerald-600 hover:text-white dark:bg-dark-800 dark:hover:bg-emerald-650 disabled:bg-slate-300 dark:disabled:bg-dark-900 disabled:text-gray-400 text-gray-700 dark:text-gray-300 font-bold text-xs uppercase tracking-wider rounded-xl transition-smooth flex items-center space-x-1.5"
             title="Download Excel spreadsheet"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0 group-hover:text-white" />
-            <span>Excel Export</span>
+            {exportingExcel ? (
+              <Loader2 className="w-4 h-4 animate-spin shrink-0 text-emerald-500" />
+            ) : (
+              <FileSpreadsheet className="w-4 h-4 text-emerald-500 shrink-0 group-hover:text-white" />
+            )}
+            <span>{exportingExcel ? 'Exporting...' : 'Excel Export'}</span>
           </button>
           <button
             onClick={() => handleExport('pdf')}
-            className="px-4 py-2.5 bg-slate-100 hover:bg-red-650 hover:text-white dark:bg-dark-800 dark:hover:bg-red-750 text-gray-700 dark:text-gray-300 font-bold text-xs uppercase tracking-wider rounded-xl transition-smooth flex items-center space-x-1.5"
+            disabled={exportingExcel || exportingPdf}
+            className="px-4 py-2.5 bg-slate-100 hover:bg-red-650 hover:text-white dark:bg-dark-800 dark:hover:bg-red-750 disabled:bg-slate-300 dark:disabled:bg-dark-900 disabled:text-gray-400 text-gray-700 dark:text-gray-300 font-bold text-xs uppercase tracking-wider rounded-xl transition-smooth flex items-center space-x-1.5"
             title="Download PDF report document"
           >
-            <FileText className="w-4 h-4 text-red-500 shrink-0 group-hover:text-white" />
-            <span>PDF Summary</span>
+            {exportingPdf ? (
+              <Loader2 className="w-4 h-4 animate-spin shrink-0 text-red-500" />
+            ) : (
+              <FileText className="w-4 h-4 text-red-500 shrink-0 group-hover:text-white" />
+            )}
+            <span>{exportingPdf ? 'Exporting...' : 'PDF Summary'}</span>
           </button>
         </div>
       </div>

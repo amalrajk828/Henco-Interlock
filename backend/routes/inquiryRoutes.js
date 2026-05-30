@@ -15,6 +15,9 @@ router.route('/')
   .post(createInquiry)
   .get(protect, admin, getInquiries);
 
+router.route('/export')
+  .get(protect, admin, exportInquiriesExcel);
+
 router.route('/export/excel')
   .get(protect, admin, exportInquiriesExcel);
 
