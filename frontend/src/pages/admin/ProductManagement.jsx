@@ -26,6 +26,7 @@ const ProductManagement = () => {
 
   const [imageFiles, setImageFiles] = useState([]); // selected files for upload
   const [existingImagesList, setExistingImagesList] = useState([]); // when editing
+  const [submitting, setSubmitting] = useState(false); // prevent double submits
 
   const fetchCatalogData = async () => {
     setLoading(true);
@@ -105,6 +106,8 @@ const ProductManagement = () => {
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
+    if (submitting) return; // ignore duplicates
+
     setError('');
     setSuccess('');
 
@@ -137,6 +140,7 @@ const ProductManagement = () => {
       });
     }
 
+    setSubmitting(true);
     try {
       let res;
       if (editingId) {
@@ -148,6 +152,7 @@ const ProductManagement = () => {
         // Add Request
         if (imageFiles.length === 0) {
           setError('At least one product image is required for new items.');
+          setSubmitting(false);
           return;
         }
         res = await api.post('/products', formData, {
@@ -162,6 +167,8 @@ const ProductManagement = () => {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit product parameters.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -465,9 +472,10 @@ const ProductManagement = () => {
               </button>
               <button
                 onClick={handleFormSubmit}
-                className="w-1/2 py-3 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-smooth shadow"
+                disabled={submitting}
+                className="w-1/2 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-slate-350 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-smooth shadow flex items-center justify-center"
               >
-                {editingId ? 'Modify specs' : 'Post product'}
+                {submitting ? 'Submitting...' : (editingId ? 'Modify specs' : 'Post product')}
               </button>
             </div>
 

@@ -133,8 +133,28 @@ export const createProduct = async (req, res, next) => {
     manualImages, // array of manual image paths from frontend (if pre-existing)
   } = req.body;
 
+  // Process files immediately to capture their public IDs for cleanup on failure
+  let productImages = [];
+  if (req.files && req.files.length > 0) {
+    productImages = req.files.map((file) => ({
+      imageUrl: file.path,
+      public_id: file.filename,
+    }));
+  }
+
+  const cleanupUploadedImages = async () => {
+    if (productImages && productImages.length > 0) {
+      for (const img of productImages) {
+        if (img.public_id) {
+          await deleteImageFromCloudinary(img.public_id);
+        }
+      }
+    }
+  };
+
   try {
     if (!name || !category || !description || !pricePerSqFt) {
+      await cleanupUploadedImages();
       return res.status(400).json({ message: 'Please provide all required fields' });
     }
 
@@ -142,17 +162,11 @@ export const createProduct = async (req, res, next) => {
     const slugExists = await Product.findOne({ slug });
 
     if (slugExists) {
+      await cleanupUploadedImages();
       return res.status(400).json({ message: 'Product with this name already exists' });
     }
 
-    // Process files
-    let productImages = [];
-    if (req.files && req.files.length > 0) {
-      productImages = req.files.map((file) => ({
-        imageUrl: file.path,
-        public_id: file.filename,
-      }));
-    } else if (manualImages) {
+    if (productImages.length === 0 && manualImages) {
       const imagesArray = Array.isArray(manualImages) ? manualImages : [manualImages];
       productImages = imagesArray.map((img) => ({
         imageUrl: img,
@@ -199,6 +213,7 @@ export const createProduct = async (req, res, next) => {
     const populatedProduct = await Product.findById(product._id).populate('category', 'name slug');
     res.status(201).json(populatedProduct);
   } catch (error) {
+    await cleanupUploadedImages();
     next(error);
   }
 };
@@ -220,10 +235,30 @@ export const updateProduct = async (req, res, next) => {
     existingImages, // Keep these images
   } = req.body;
 
+  // Track newly uploaded images to delete them if product updating fails
+  let newUploadedImages = [];
+  if (req.files && req.files.length > 0) {
+    newUploadedImages = req.files.map((file) => ({
+      imageUrl: file.path,
+      public_id: file.filename,
+    }));
+  }
+
+  const cleanupNewUploads = async () => {
+    if (newUploadedImages && newUploadedImages.length > 0) {
+      for (const img of newUploadedImages) {
+        if (img.public_id) {
+          await deleteImageFromCloudinary(img.public_id);
+        }
+      }
+    }
+  };
+
   try {
     const product = await Product.findById(id);
 
     if (!product) {
+      await cleanupNewUploads();
       return res.status(404).json({ message: 'Product not found' });
     }
 
@@ -283,12 +318,8 @@ export const updateProduct = async (req, res, next) => {
       }
     }
 
-    if (req.files && req.files.length > 0) {
-      const newImages = req.files.map((file) => ({
-        imageUrl: file.path,
-        public_id: file.filename,
-      }));
-      productImages = [...productImages, ...newImages];
+    if (newUploadedImages.length > 0) {
+      productImages = [...productImages, ...newUploadedImages];
     }
 
     if (productImages.length > 0) {
@@ -307,6 +338,7 @@ export const updateProduct = async (req, res, next) => {
     const populatedProduct = await Product.findById(updatedProduct._id).populate('category', 'name slug');
     res.status(200).json(populatedProduct);
   } catch (error) {
+    await cleanupNewUploads();
     next(error);
   }
 };
