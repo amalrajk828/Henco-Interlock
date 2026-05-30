@@ -6,7 +6,7 @@ import { Phone, Mail, MapPin, Clock, Send, MessageSquare, Facebook, Instagram, L
 
 const Contact = () => {
   const { settings } = useSettings();
-  const mapUrl = settings.googleMapsEmbedUrl;
+  const mapUrl = settings.mapUrl || settings.googleMapsEmbedUrl;
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -288,20 +288,23 @@ const Contact = () => {
 
       </div>
 
-      {/* Google Maps Iframe block */}
+      {/* Google Maps Clickable Card block */}
       {mapUrl && (
-        <div className="w-full h-[350px] rounded-3xl overflow-hidden shadow-inner border border-slate-200/50 dark:border-dark-800/50 relative">
-          <iframe
-            src={mapUrl}
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            title="Google Maps Location Frame"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
-        </div>
+        <a href={mapUrl} target="_blank" rel="noopener noreferrer" className="block w-full">
+          <div className="map-card w-full py-8 px-6 bg-white dark:bg-dark-900 border border-slate-200/50 dark:border-dark-800/50 hover:border-primary-500 dark:hover:border-primary-500 rounded-3xl shadow-sm text-center transition-all duration-300 hover:shadow-md cursor-pointer flex flex-col items-center justify-center space-y-3.5 group">
+            <div className="w-12 h-12 bg-primary-50 dark:bg-primary-950/20 text-primary-600 dark:text-primary-400 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+              <span className="text-2xl">📍</span>
+            </div>
+            <div>
+              <span className="font-extrabold text-base text-gray-900 dark:text-white block group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                View Our Location on Google Maps
+              </span>
+              <span className="text-xs text-gray-400 block mt-1">
+                Click to open navigation directions in a new tab
+              </span>
+            </div>
+          </div>
+        </a>
       )}
 
     </div>

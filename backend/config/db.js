@@ -44,9 +44,9 @@ const seedDatabase = async () => {
     }
 
     // 3. Seed Default Settings
-    const settingsExists = await Settings.findOne({ key: 'site_settings' });
+    const settingsExists = await Settings.findOne({});
     if (!settingsExists) {
-      await Settings.create({ key: 'site_settings' });
+      await Settings.create({});
       console.log('✔ Default site settings initialized');
     }
 

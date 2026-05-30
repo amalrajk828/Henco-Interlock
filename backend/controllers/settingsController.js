@@ -9,10 +9,11 @@ import ActivityLog from '../models/ActivityLog.js';
 // @access  Public
 export const getSettings = async (req, res, next) => {
   try {
-    let settings = await Settings.findOne({ key: 'site_settings' });
-    if (!settings) {
-      settings = await Settings.create({ key: 'site_settings' });
-    }
+    const settings = await Settings.findOneAndUpdate(
+      {},
+      {},
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
     res.status(200).json(settings);
   } catch (error) {
     next(error);
@@ -24,11 +25,7 @@ export const getSettings = async (req, res, next) => {
 // @access  Private/Admin
 export const updateSettings = async (req, res, next) => {
   try {
-    let settings = await Settings.findOne({ key: 'site_settings' });
-    if (!settings) {
-      settings = new Settings({ key: 'site_settings' });
-    }
-
+    const updateData = {};
     const fieldsToUpdate = [
       'heroTitle',
       'heroSubtitle',
@@ -44,15 +41,63 @@ export const updateSettings = async (req, res, next) => {
       'instagramLink',
       'linkedinLink',
       'googleMapsEmbedUrl',
+      'siteName',
+      'logo',
+      'contactEmail',
+      'mapUrl',
+      'socialLinks'
     ];
 
     fieldsToUpdate.forEach((field) => {
       if (req.body[field] !== undefined) {
-        settings[field] = req.body[field];
+        updateData[field] = req.body[field];
       }
     });
 
-    const updatedSettings = await settings.save();
+    // Handle bidirectional synchronization between old and new properties for backward compatibility
+    if (req.body.contactEmail !== undefined) {
+      updateData.email = req.body.contactEmail;
+    } else if (req.body.email !== undefined) {
+      updateData.contactEmail = req.body.email;
+    }
+
+    if (req.body.mapUrl !== undefined) {
+      updateData.googleMapsEmbedUrl = req.body.mapUrl;
+    } else if (req.body.googleMapsEmbedUrl !== undefined) {
+      updateData.mapUrl = req.body.googleMapsEmbedUrl;
+    }
+
+    if (req.body.siteName !== undefined) {
+      updateData.heroTitle = req.body.siteName;
+    } else if (req.body.heroTitle !== undefined) {
+      updateData.siteName = req.body.heroTitle;
+    }
+
+    // Automatically sync socialLinks nested object with flat properties
+    if (req.body.socialLinks) {
+      if (req.body.socialLinks.facebook !== undefined) updateData.facebookLink = req.body.socialLinks.facebook;
+      if (req.body.socialLinks.instagram !== undefined) updateData.instagramLink = req.body.socialLinks.instagram;
+      if (req.body.socialLinks.linkedin !== undefined) updateData.linkedinLink = req.body.socialLinks.linkedin;
+      if (req.body.socialLinks.whatsapp !== undefined) updateData.whatsappNumber = req.body.socialLinks.whatsapp;
+    } else if (
+      req.body.facebookLink !== undefined ||
+      req.body.instagramLink !== undefined ||
+      req.body.linkedinLink !== undefined ||
+      req.body.whatsappNumber !== undefined
+    ) {
+      updateData.socialLinks = {
+        facebook: req.body.facebookLink !== undefined ? req.body.facebookLink : (updateData.facebookLink || ''),
+        instagram: req.body.instagramLink !== undefined ? req.body.instagramLink : (updateData.instagramLink || ''),
+        linkedin: req.body.linkedinLink !== undefined ? req.body.linkedinLink : (updateData.linkedinLink || ''),
+        whatsapp: req.body.whatsappNumber !== undefined ? req.body.whatsappNumber : (updateData.whatsappNumber || '')
+      };
+    }
+
+    const updatedSettings = await Settings.findOneAndUpdate(
+      {},
+      { $set: updateData },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
 
     // Log Activity
     await ActivityLog.create({

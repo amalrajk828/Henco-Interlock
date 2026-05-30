@@ -64,6 +64,31 @@ const settingsSchema = new mongoose.Schema(
       type: String,
       default: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3928.8473347963385!2d76.3267923!3d10.029312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b080c8e1a5f6eef%3A0xe54fb72557e0fa0c!2sKochi%2C%20Kerala!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin',
     },
+    siteName: {
+      type: String,
+      default: 'Henco Interlock - Premium Paving & Landscaping Solutions',
+    },
+    logo: {
+      type: String,
+      default: '',
+    },
+    contactEmail: {
+      type: String,
+      default: 'info@hencointerlock.com',
+    },
+    mapUrl: {
+      type: String,
+      default: 'https://www.google.com/maps/place/Kochi,+Kerala',
+    },
+    socialLinks: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {
+        facebook: 'https://facebook.com/hencointerlock',
+        instagram: 'https://instagram.com/hencointerlock',
+        linkedin: 'https://linkedin.com/company/hencointerlock',
+        whatsapp: '919876543210'
+      }
+    },
   },
   {
     timestamps: true,
