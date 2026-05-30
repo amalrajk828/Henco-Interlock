@@ -61,15 +61,31 @@ app.use('/uploads', express.static(uploadsPath));
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Henco Interlock API is live and healthy' });
 });
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Henco Interlock API is live and healthy' });
+});
 
-// Mount Routes
+// Mount Routes (Supports both prefixed /api/x and direct /x endpoints for Vercel/Render env consistency)
 app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api/categories', categoryRoutes);
+app.use('/categories', categoryRoutes);
+
 app.use('/api/products', productRoutes);
+app.use('/products', productRoutes);
+
 app.use('/api/inquiries', inquiryRoutes);
+app.use('/inquiries', inquiryRoutes);
+
 app.use('/api/projects', projectRoutes);
+app.use('/projects', projectRoutes);
+
 app.use('/api/testimonials', testimonialRoutes);
+app.use('/testimonials', testimonialRoutes);
+
 app.use('/api/settings', settingsRoutes);
+app.use('/settings', settingsRoutes);
 
 // General Exception Middlewares
 app.use(notFound);
