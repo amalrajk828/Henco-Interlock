@@ -19,18 +19,18 @@ const projectSchema = new mongoose.Schema(
     },
     images: {
       type: [{
-        url: { type: String, required: true },
-        publicId: { type: String, required: true }
+        imageUrl: { type: String, required: true },
+        public_id: { type: String, required: true }
       }],
       required: [true, 'At least one project image is required'],
     },
     beforeImage: {
-      url: { type: String, default: '' },
-      publicId: { type: String, default: '' }
+      imageUrl: { type: String, default: '' },
+      public_id: { type: String, default: '' }
     },
     afterImage: {
-      url: { type: String, default: '' },
-      publicId: { type: String, default: '' }
+      imageUrl: { type: String, default: '' },
+      public_id: { type: String, default: '' }
     },
     clientName: {
       type: String,

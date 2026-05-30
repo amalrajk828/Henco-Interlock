@@ -149,14 +149,14 @@ export const createProduct = async (req, res, next) => {
     let productImages = [];
     if (req.files && req.files.length > 0) {
       productImages = req.files.map((file) => ({
-        url: file.path,
-        publicId: file.filename,
+        imageUrl: file.path,
+        public_id: file.filename,
       }));
     } else if (manualImages) {
       const imagesArray = Array.isArray(manualImages) ? manualImages : [manualImages];
       productImages = imagesArray.map((img) => ({
-        url: img,
-        publicId: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy',
+        imageUrl: img,
+        public_id: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy',
       }));
     }
 
@@ -258,15 +258,15 @@ export const updateProduct = async (req, res, next) => {
     if (existingImages) {
       const existingArray = Array.isArray(existingImages) ? existingImages : [existingImages];
       productImages = existingArray.map((img) => {
-        if (typeof img === 'object' && img.url) return img;
+        if (typeof img === 'object' && img.imageUrl) return img;
         if (typeof img === 'string') {
           try {
             const parsed = JSON.parse(img);
-            if (parsed.url) return parsed;
+            if (parsed.imageUrl) return parsed;
           } catch (e) {}
           return {
-            url: img,
-            publicId: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy'
+            imageUrl: img,
+            public_id: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy'
           };
         }
         return img;
@@ -274,19 +274,19 @@ export const updateProduct = async (req, res, next) => {
     }
 
     // Identify and delete removed images from Cloudinary
-    const newPublicIds = productImages.map(img => img.publicId).filter(Boolean);
+    const newPublicIds = productImages.map(img => img.public_id).filter(Boolean);
     if (product.images && product.images.length > 0) {
       for (const oldImg of product.images) {
-        if (oldImg.publicId && !newPublicIds.includes(oldImg.publicId)) {
-          await deleteImageFromCloudinary(oldImg.publicId);
+        if (oldImg.public_id && !newPublicIds.includes(oldImg.public_id)) {
+          await deleteImageFromCloudinary(oldImg.public_id);
         }
       }
     }
 
     if (req.files && req.files.length > 0) {
       const newImages = req.files.map((file) => ({
-        url: file.path,
-        publicId: file.filename,
+        imageUrl: file.path,
+        public_id: file.filename,
       }));
       productImages = [...productImages, ...newImages];
     }
@@ -327,8 +327,8 @@ export const deleteProduct = async (req, res, next) => {
     // Delete images from Cloudinary
     if (product.images && product.images.length > 0) {
       for (const img of product.images) {
-        if (img.publicId) {
-          await deleteImageFromCloudinary(img.publicId);
+        if (img.public_id) {
+          await deleteImageFromCloudinary(img.public_id);
         }
       }
     }
@@ -343,6 +343,85 @@ export const deleteProduct = async (req, res, next) => {
     });
 
     res.status(200).json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all products for Admin (includes pricePerSqFt)
+// @route   GET /api/admin/products
+// @access  Private/Admin
+export const getAdminProducts = async (req, res, next) => {
+  const { search, category, sort, stockStatus, isFeatured, limit, page } = req.query;
+
+  try {
+    const query = {};
+
+    // 1. Filter by Text Search
+    if (search) {
+      query.$text = { $search: search };
+    }
+
+    // 2. Filter by Category
+    if (category) {
+      const foundCategory = await Category.findOne({
+        $or: [
+          { _id: category.match(/^[0-9a-fA-F]{24}$/) ? category : null },
+          { slug: category },
+        ].filter(Boolean),
+      });
+
+      if (foundCategory) {
+        query.category = foundCategory._id;
+      } else {
+        return res.status(200).json({ products: [], page: 1, pages: 0, total: 0 });
+      }
+    }
+
+    // 3. Filter by Stock Status
+    if (stockStatus) {
+      query.stockStatus = stockStatus;
+    }
+
+    // 4. Filter by Featured
+    if (isFeatured !== undefined) {
+      query.isFeatured = isFeatured === 'true';
+    }
+
+    // 5. Build Sort Options
+    let sortOptions = { createdAt: -1 };
+    if (sort) {
+      if (sort === 'price_asc') {
+        sortOptions = { pricePerSqFt: 1 };
+      } else if (sort === 'price_desc') {
+        sortOptions = { pricePerSqFt: -1 };
+      } else if (sort === 'popularity') {
+        sortOptions = { popularity: -1 };
+      } else if (sort === 'name_asc') {
+        sortOptions = { name: 1 };
+      } else if (sort === 'name_desc') {
+        sortOptions = { name: -1 };
+      }
+    }
+
+    // 6. Pagination Configurations
+    const pageSize = Number(limit) || 12;
+    const currentPage = Number(page) || 1;
+    const count = await Product.countDocuments(query);
+
+    const products = await Product.find(query)
+      .populate('category', 'name slug')
+      .select('+pricePerSqFt') // Explicitly select pricePerSqFt for admin
+      .sort(sortOptions)
+      .limit(pageSize)
+      .skip(pageSize * (currentPage - 1));
+
+    res.status(200).json({
+      products,
+      page: currentPage,
+      pages: Math.ceil(count / pageSize),
+      total: count,
+    });
   } catch (error) {
     next(error);
   }

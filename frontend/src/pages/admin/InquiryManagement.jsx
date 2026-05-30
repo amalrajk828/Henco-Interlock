@@ -191,7 +191,7 @@ const InquiryManagement = () => {
                   <th className="px-6 py-4">Tracking ID</th>
                   <th className="px-6 py-4">Client Detail</th>
                   <th className="px-6 py-4">Product Interest</th>
-                  <th className="px-6 py-4">Est. Vol.</th>
+                  <th className="px-6 py-4">Volume / Area</th>
                   <th className="px-6 py-4">Submitted</th>
                   <th className="px-6 py-4">Status</th>
                   <th className="px-6 py-4 text-center">Review</th>
@@ -212,8 +212,11 @@ const InquiryManagement = () => {
                     <td className="px-6 py-4 text-xs font-semibold text-gray-650 dark:text-gray-300">
                       {item.productInterested?.name || 'Custom Paver'}
                     </td>
-                    <td className="px-6 py-4 text-xs font-bold text-gray-950 dark:text-white">
-                      {item.quantity} Sq Ft
+                    <td className="px-6 py-4 text-xs">
+                      <div className="space-y-0.5 text-left">
+                        <span className="font-bold text-gray-950 dark:text-white block leading-tight">{item.area || 0} Sq Ft</span>
+                        <span className="text-[10px] text-gray-450 block">{item.quantity || 0} units</span>
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-400">
                       {new Date(item.createdAt).toLocaleDateString()}
@@ -305,13 +308,13 @@ const InquiryManagement = () => {
                   <span className="block text-[9px] text-gray-400 uppercase tracking-wider font-bold font-mono">Date Registered</span>
                   <span className="block text-gray-700 dark:text-gray-300">{new Date(selectedInquiry.createdAt).toLocaleString()}</span>
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 col-span-2 sm:col-span-1">
                   <span className="block text-[9px] text-gray-400 uppercase tracking-wider font-bold">Product Interest</span>
                   <span className="block font-bold text-gray-900 dark:text-white leading-tight">{selectedInquiry.productInterested?.name || 'Custom Paver'}</span>
                 </div>
-                <div className="space-y-1.5">
-                  <span className="block text-[9px] text-gray-400 uppercase tracking-wider font-bold">Volume Quantity</span>
-                  <span className="block font-bold text-primary-600 dark:text-primary-400">{selectedInquiry.quantity} Square Feet</span>
+                <div className="space-y-1.5 col-span-2 sm:col-span-1">
+                  <span className="block text-[9px] text-gray-400 uppercase tracking-wider font-bold">Est. Area / Quantity</span>
+                  <span className="block font-bold text-primary-600 dark:text-primary-400">{selectedInquiry.area || 0} Sq Ft / {selectedInquiry.quantity || 0} units</span>
                 </div>
               </div>
 

@@ -40,20 +40,20 @@ export const createProject = async (req, res, next) => {
     if (req.files) {
       if (req.files.images) {
         projectImages = req.files.images.map(file => ({
-          url: file.path,
-          publicId: file.filename,
+          imageUrl: file.path,
+          public_id: file.filename,
         }));
       }
       if (req.files.beforeImage) {
         beforeImg = {
-          url: req.files.beforeImage[0].path,
-          publicId: req.files.beforeImage[0].filename,
+          imageUrl: req.files.beforeImage[0].path,
+          public_id: req.files.beforeImage[0].filename,
         };
       }
       if (req.files.afterImage) {
         afterImg = {
-          url: req.files.afterImage[0].path,
-          publicId: req.files.afterImage[0].filename,
+          imageUrl: req.files.afterImage[0].path,
+          public_id: req.files.afterImage[0].filename,
         };
       }
     }
@@ -62,8 +62,8 @@ export const createProject = async (req, res, next) => {
     if (projectImages.length === 0 && manualImages) {
       const imagesArray = Array.isArray(manualImages) ? manualImages : [manualImages];
       projectImages = imagesArray.map(img => ({
-        url: img,
-        publicId: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy',
+        imageUrl: img,
+        public_id: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy',
       }));
     }
 
@@ -122,15 +122,15 @@ export const updateProject = async (req, res, next) => {
     if (existingImages) {
       const existingArray = Array.isArray(existingImages) ? existingImages : [existingImages];
       projectImages = existingArray.map((img) => {
-        if (typeof img === 'object' && img.url) return img;
+        if (typeof img === 'object' && img.imageUrl) return img;
         if (typeof img === 'string') {
           try {
             const parsed = JSON.parse(img);
-            if (parsed.url) return parsed;
+            if (parsed.imageUrl) return parsed;
           } catch (e) {}
           return {
-            url: img,
-            publicId: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy'
+            imageUrl: img,
+            public_id: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy'
           };
         }
         return img;
@@ -138,11 +138,11 @@ export const updateProject = async (req, res, next) => {
     }
 
     // Identify and delete removed images from Cloudinary
-    const newPublicIds = projectImages.map(img => img.publicId).filter(Boolean);
+    const newPublicIds = projectImages.map(img => img.public_id).filter(Boolean);
     if (project.images && project.images.length > 0) {
       for (const oldImg of project.images) {
-        if (oldImg.publicId && !newPublicIds.includes(oldImg.publicId)) {
-          await deleteImageFromCloudinary(oldImg.publicId);
+        if (oldImg.public_id && !newPublicIds.includes(oldImg.public_id)) {
+          await deleteImageFromCloudinary(oldImg.public_id);
         }
       }
     }
@@ -151,27 +151,27 @@ export const updateProject = async (req, res, next) => {
     if (req.files) {
       if (req.files.images) {
         const newImages = req.files.images.map(file => ({
-          url: file.path,
-          publicId: file.filename,
+          imageUrl: file.path,
+          public_id: file.filename,
         }));
         projectImages = [...projectImages, ...newImages];
       }
       if (req.files.beforeImage) {
-        if (project.beforeImage && project.beforeImage.publicId) {
-          await deleteImageFromCloudinary(project.beforeImage.publicId);
+        if (project.beforeImage && project.beforeImage.public_id) {
+          await deleteImageFromCloudinary(project.beforeImage.public_id);
         }
         project.beforeImage = {
-          url: req.files.beforeImage[0].path,
-          publicId: req.files.beforeImage[0].filename,
+          imageUrl: req.files.beforeImage[0].path,
+          public_id: req.files.beforeImage[0].filename,
         };
       }
       if (req.files.afterImage) {
-        if (project.afterImage && project.afterImage.publicId) {
-          await deleteImageFromCloudinary(project.afterImage.publicId);
+        if (project.afterImage && project.afterImage.public_id) {
+          await deleteImageFromCloudinary(project.afterImage.public_id);
         }
         project.afterImage = {
-          url: req.files.afterImage[0].path,
-          publicId: req.files.afterImage[0].filename,
+          imageUrl: req.files.afterImage[0].path,
+          public_id: req.files.afterImage[0].filename,
         };
       }
     }
@@ -211,16 +211,16 @@ export const deleteProject = async (req, res, next) => {
     // Delete images from Cloudinary
     if (project.images && project.images.length > 0) {
       for (const img of project.images) {
-        if (img.publicId) {
-          await deleteImageFromCloudinary(img.publicId);
+        if (img.public_id) {
+          await deleteImageFromCloudinary(img.public_id);
         }
       }
     }
-    if (project.beforeImage && project.beforeImage.publicId) {
-      await deleteImageFromCloudinary(project.beforeImage.publicId);
+    if (project.beforeImage && project.beforeImage.public_id) {
+      await deleteImageFromCloudinary(project.beforeImage.public_id);
     }
-    if (project.afterImage && project.afterImage.publicId) {
-      await deleteImageFromCloudinary(project.afterImage.publicId);
+    if (project.afterImage && project.afterImage.public_id) {
+      await deleteImageFromCloudinary(project.afterImage.public_id);
     }
 
     await Project.findByIdAndDelete(id);

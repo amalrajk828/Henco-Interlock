@@ -31,7 +31,7 @@ export const createTestimonial = async (req, res, next) => {
       role: role || '',
       review,
       rating: Number(rating),
-      image: typeof image === 'object' && image.url ? image : { url: image || '', publicId: 'legacy' },
+      image: typeof image === 'object' && image.imageUrl ? image : { imageUrl: image || '', public_id: 'legacy' },
       isApproved: true, // Auto-approve for local demo, can be toggled by admin
     });
 
@@ -61,7 +61,7 @@ export const updateTestimonial = async (req, res, next) => {
     if (review) testimonial.review = review;
     if (rating !== undefined) testimonial.rating = Number(rating);
     if (image !== undefined) {
-      testimonial.image = typeof image === 'object' && image.url ? image : { url: image || '', publicId: 'legacy' };
+      testimonial.image = typeof image === 'object' && image.imageUrl ? image : { imageUrl: image || '', public_id: 'legacy' };
     }
     if (isApproved !== undefined) testimonial.isApproved = isApproved;
 
@@ -94,8 +94,8 @@ export const deleteTestimonial = async (req, res, next) => {
     }
 
     // Delete image from Cloudinary
-    if (testimonial.image && testimonial.image.publicId) {
-      await deleteImageFromCloudinary(testimonial.image.publicId);
+    if (testimonial.image && testimonial.image.public_id) {
+      await deleteImageFromCloudinary(testimonial.image.public_id);
     }
 
     await Testimonial.findByIdAndDelete(id);

@@ -147,7 +147,11 @@ const InquiryTracking = () => {
                   </li>
                   <li className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
                     <FileText className="w-4 h-4 text-primary-500 shrink-0" />
-                    <span>Volume: <strong>{inquiry.quantity} Square Feet</strong></span>
+                    <span>Area: <strong>{inquiry.area || 0} Sq Ft</strong></span>
+                  </li>
+                  <li className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
+                    <FileText className="w-4 h-4 text-primary-500 shrink-0" />
+                    <span>Quantity: <strong>{inquiry.quantity || 0} units</strong></span>
                   </li>
                   <li className="flex items-center space-x-2 text-gray-600 dark:text-gray-300">
                     <Calendar className="w-4 h-4 text-primary-500 shrink-0" />
@@ -162,7 +166,6 @@ const InquiryTracking = () => {
                   <h5 className="font-extrabold text-[10px] text-gray-450 dark:text-gray-400 uppercase tracking-wider">Selected Product Details</h5>
                   <span className="block font-bold text-xs text-gray-900 dark:text-white leading-tight">{inquiry.productInterested.name}</span>
                   <p className="text-[10px] text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">{inquiry.productInterested.description}</p>
-                  <span className="block text-[10px] font-bold text-primary-600 dark:text-primary-500">Est. Rate: ₹{inquiry.productInterested.pricePerSqFt} / Sq Ft</span>
                 </div>
               )}
 

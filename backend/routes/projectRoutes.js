@@ -6,11 +6,11 @@ import {
   deleteProject,
 } from '../controllers/projectController.js';
 import { protect, admin } from '../middleware/authMiddleware.js';
-import { upload } from '../middleware/uploadMiddleware.js';
+import { uploadProjects } from '../middleware/uploadMiddleware.js';
 
 const router = express.Router();
 
-const uploadFields = upload.fields([
+const uploadFields = uploadProjects.fields([
   { name: 'images', maxCount: 6 },
   { name: 'beforeImage', maxCount: 1 },
   { name: 'afterImage', maxCount: 1 },

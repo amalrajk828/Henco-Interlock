@@ -27,11 +27,12 @@ const productSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Price per square foot is required'],
       min: [0, 'Price must be positive'],
+      select: false, // Hide price from public endpoints by default
     },
     images: {
       type: [{
-        url: { type: String, required: true },
-        publicId: { type: String, required: true }
+        imageUrl: { type: String, required: true },
+        public_id: { type: String, required: true }
       }],
       required: [true, 'At least one product image is required'],
     },

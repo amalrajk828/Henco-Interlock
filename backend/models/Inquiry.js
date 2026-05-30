@@ -27,10 +27,15 @@ const inquirySchema = new mongoose.Schema(
       ref: 'Product',
       required: [true, 'Product interest is required'],
     },
+    area: {
+      type: Number,
+      required: [true, 'Area in square feet is required'],
+      min: [1, 'Area must be at least 1 square foot'],
+    },
     quantity: {
       type: Number,
-      required: [true, 'Quantity in square feet is required'],
-      min: [1, 'Quantity must be at least 1 square foot'],
+      required: [true, 'Quantity is required'],
+      min: [1, 'Quantity must be at least 1'],
     },
     message: {
       type: String,

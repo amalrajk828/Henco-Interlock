@@ -30,7 +30,7 @@ const ProductManagement = () => {
   const fetchCatalogData = async () => {
     setLoading(true);
     try {
-      const prodRes = await api.get('/products?limit=100');
+      const prodRes = await api.get('/admin/products?limit=100');
       setProducts(prodRes.data.products);
 
       const catRes = await api.get('/categories');

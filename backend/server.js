@@ -8,6 +8,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import adminProductRoutes from './routes/adminProductRoutes.js';
 import inquiryRoutes from './routes/inquiryRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import testimonialRoutes from './routes/testimonialRoutes.js';
@@ -69,6 +70,9 @@ app.use('/categories', categoryRoutes);
 
 app.use('/api/products', productRoutes);
 app.use('/products', productRoutes);
+
+app.use('/api/admin/products', adminProductRoutes);
+app.use('/admin/products', adminProductRoutes);
 
 app.use('/api/inquiries', inquiryRoutes);
 app.use('/inquiries', inquiryRoutes);

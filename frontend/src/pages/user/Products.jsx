@@ -22,6 +22,7 @@ const Products = () => {
   // Details Modal State
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quoteRequest, setQuoteRequest] = useState(null); // to show quote form inside modal
+  const [quoteArea, setQuoteArea] = useState('1000');
   const [quoteQuantity, setQuoteQuantity] = useState('1000');
   const [quoteSubmitted, setQuoteSubmitted] = useState(false);
   const [quoteError, setQuoteError] = useState('');
@@ -99,7 +100,7 @@ const Products = () => {
     setQuoteError('');
     const { name, phone, email, message } = quoteForm;
 
-    if (!name || !phone || !email || !quoteQuantity) {
+    if (!name || !phone || !email || !quoteArea || !quoteQuantity) {
       setQuoteError('Please fill in all required fields.');
       return;
     }
@@ -110,6 +111,7 @@ const Products = () => {
         phone,
         email,
         productInterested: selectedProduct._id,
+        area: Number(quoteArea),
         quantity: Number(quoteQuantity),
         message,
       });
@@ -117,6 +119,8 @@ const Products = () => {
       if (res.status === 201) {
         setQuoteSubmitted(true);
         setQuoteForm({ name: '', phone: '', email: '', message: '' });
+        setQuoteArea('1000');
+        setQuoteQuantity('1000');
       }
     } catch (err) {
       setQuoteError(err.response?.data?.message || 'Failed to submit quote. Please try again.');
@@ -312,7 +316,7 @@ const Products = () => {
                     <div className="pt-3 border-t border-slate-200 dark:border-dark-800 flex items-center justify-between">
                       <div>
                         <span className="block text-[8px] text-gray-400 uppercase tracking-wider">Price Estimate</span>
-                        <span className="font-extrabold text-primary-600 dark:text-primary-500">₹{prod.pricePerSqFt} <span className="text-[10px] text-gray-400 font-medium">/ Sq. Ft.</span></span>
+                        <span className="font-extrabold text-primary-600 dark:text-primary-500 text-xs">Request Price</span>
                       </div>
                       <span className="text-xs font-bold text-gray-700 dark:text-gray-300 group-hover:text-primary-600 flex items-center space-x-1.5 bg-slate-50 dark:bg-dark-800 py-1.5 px-3 rounded-lg border border-slate-100 dark:border-dark-800">
                         <Info className="w-3.5 h-3.5" />
@@ -414,9 +418,9 @@ const Products = () => {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <span className="text-[9px] text-gray-400 uppercase block tracking-wider">Price per square foot</span>
-                      <strong className="text-2xl text-primary-600 dark:text-primary-500 font-extrabold">₹{selectedProduct.pricePerSqFt} <span className="text-xs text-gray-400 font-medium">/ Sq. Ft.</span></strong>
-                    </div>
+                    <span className="text-[9px] text-gray-400 uppercase block tracking-wider">Price per square foot</span>
+                    <strong className="text-primary-600 dark:text-primary-500 font-extrabold text-sm block mt-1">Request Price</strong>
+                  </div>
                   </div>
 
                   <div className="pt-2">
@@ -501,17 +505,30 @@ const Products = () => {
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-[9px] font-bold text-gray-400 uppercase">Volume (Sq Ft)</label>
+                          <label className="text-[9px] font-bold text-gray-400 uppercase">Area (Sq Ft)</label>
                           <input
                             type="number"
                             required
                             min="1"
-                            value={quoteQuantity}
-                            onChange={(e) => setQuoteQuantity(e.target.value)}
+                            value={quoteArea}
+                            onChange={(e) => setQuoteArea(e.target.value)}
                             placeholder="1000"
                             className="w-full px-3 py-2 border border-slate-200 dark:border-dark-800 rounded-lg text-xs bg-slate-50 dark:bg-dark-950 dark:text-white focus:outline-none"
                           />
                         </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[9px] font-bold text-gray-400 uppercase">Quantity (Units / Pieces)</label>
+                        <input
+                          type="number"
+                          required
+                          min="1"
+                          value={quoteQuantity}
+                          onChange={(e) => setQuoteQuantity(e.target.value)}
+                          placeholder="1000"
+                          className="w-full px-3 py-2 border border-slate-200 dark:border-dark-800 rounded-lg text-xs bg-slate-50 dark:bg-dark-950 dark:text-white focus:outline-none"
+                        />
                       </div>
 
                       <div className="space-y-1">

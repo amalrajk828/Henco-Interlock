@@ -9,10 +9,10 @@ import PDFDocument from 'pdfkit';
 // @route   POST /api/inquiries
 // @access  Public
 export const createInquiry = async (req, res, next) => {
-  const { name, phone, email, productInterested, quantity, message } = req.body;
+  const { name, phone, email, productInterested, area, quantity, message } = req.body;
 
   try {
-    if (!name || !phone || !email || !productInterested || !quantity) {
+    if (!name || !phone || !email || !productInterested || !area || !quantity) {
       return res.status(400).json({ message: 'Please fill in all required fields' });
     }
 
@@ -26,6 +26,7 @@ export const createInquiry = async (req, res, next) => {
       phone,
       email,
       productInterested,
+      area: Number(area),
       quantity: Number(quantity),
       message,
     });
@@ -96,7 +97,7 @@ export const trackInquiry = async (req, res, next) => {
 
   try {
     const inquiry = await Inquiry.findOne({ trackingId: trackingId.toUpperCase().trim() })
-      .populate('productInterested', 'name pricePerSqFt images description');
+      .populate('productInterested', 'name images description'); // Exclude pricePerSqFt completely!
 
     if (!inquiry) {
       return res.status(404).json({ message: 'Inquiry tracking ID not found. Please double check the code.' });
@@ -106,6 +107,7 @@ export const trackInquiry = async (req, res, next) => {
       trackingId: inquiry.trackingId,
       name: inquiry.name,
       productInterested: inquiry.productInterested,
+      area: inquiry.area,
       quantity: inquiry.quantity,
       status: inquiry.status,
       createdAt: inquiry.createdAt,
@@ -167,7 +169,8 @@ export const exportInquiriesExcel = async (req, res, next) => {
       { header: 'Email Address', key: 'email', width: 25 },
       { header: 'Phone Number', key: 'phone', width: 15 },
       { header: 'Product Interested', key: 'product', width: 25 },
-      { header: 'Quantity (Sq Ft)', key: 'quantity', width: 18 },
+      { header: 'Area (Sq Ft)', key: 'area', width: 15 },
+      { header: 'Quantity (Units)', key: 'quantity', width: 18 },
       { header: 'Status', key: 'status', width: 12 },
       { header: 'Date Submitted', key: 'date', width: 20 },
       { header: 'Comments', key: 'comments', width: 30 },
@@ -189,6 +192,7 @@ export const exportInquiriesExcel = async (req, res, next) => {
         email: item.email,
         phone: item.phone,
         product: item.productInterested ? item.productInterested.name : 'N/A',
+        area: item.area || 0,
         quantity: item.quantity,
         status: item.status,
         date: new Date(item.createdAt).toLocaleString(),
@@ -260,7 +264,7 @@ export const exportInquiriesPdf = async (req, res, next) => {
     doc.text('Tracking ID', 35, startY);
     doc.text('Name & Phone', 130, startY);
     doc.text('Product Interest', 260, startY);
-    doc.text('Volume (Sq Ft)', 390, startY);
+    doc.text('Area / Qty', 390, startY);
     doc.text('Status', 485, startY);
     
     doc.moveDown(1.5);
@@ -295,7 +299,7 @@ export const exportInquiriesPdf = async (req, res, next) => {
       doc.text(item.trackingId, 35, rowY + 3);
       doc.text(`${item.name}\n${item.phone}`, 130, rowY + 3);
       doc.text(item.productInterested ? item.productInterested.name : 'Custom', 260, rowY + 3);
-      doc.text(`${item.quantity} Sq Ft`, 390, rowY + 3);
+      doc.text(`${item.area || 0} Sq Ft\n${item.quantity || 0} units`, 390, rowY + 3);
       
       // Status Color-coding
       if (item.status === 'Pending') {

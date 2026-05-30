@@ -30,8 +30,8 @@ const testimonialSchema = new mongoose.Schema(
       default: 5,
     },
     image: {
-      url: { type: String, default: '' },
-      publicId: { type: String, default: '' }
+      imageUrl: { type: String, default: '' },
+      public_id: { type: String, default: '' }
     },
     isApproved: {
       type: Boolean,

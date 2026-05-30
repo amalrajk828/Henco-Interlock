@@ -20,6 +20,7 @@ const Home = () => {
     phone: '',
     email: '',
     productInterested: '',
+    area: '',
     quantity: '',
     message: '',
   });
@@ -67,9 +68,9 @@ const Home = () => {
   const handleQuoteSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
-    const { name, phone, email, productInterested, quantity } = quoteForm;
+    const { name, phone, email, productInterested, area, quantity } = quoteForm;
 
-    if (!name || !phone || !email || !productInterested || !quantity) {
+    if (!name || !phone || !email || !productInterested || !area || !quantity) {
       setFormError('Please fill in all required fields.');
       return;
     }
@@ -84,6 +85,7 @@ const Home = () => {
           phone: '',
           email: '',
           productInterested: '',
+          area: '',
           quantity: '',
           message: '',
         });
@@ -307,7 +309,7 @@ const Home = () => {
                     <div className="pt-2 border-t border-slate-200 dark:border-dark-800 flex items-center justify-between">
                       <div>
                         <span className="block text-[9px] text-gray-400 uppercase tracking-wider">Est. Price</span>
-                        <span className="font-extrabold text-primary-600 dark:text-primary-500">₹{prod.pricePerSqFt} <span className="text-[10px] text-gray-500 font-medium">/ Sq. Ft.</span></span>
+                        <span className="font-extrabold text-primary-600 dark:text-primary-500 text-xs">Request Price</span>
                       </div>
                       <Link
                         to={`/products?slug=${prod.slug}`}
@@ -448,24 +450,39 @@ const Home = () => {
                   >
                     <option value="">Select a Product</option>
                     {allProducts.map((p) => (
-                      <option key={p._id} value={p._id}>{p.name} (₹{p.pricePerSqFt}/Sq Ft)</option>
+                      <option key={p._id} value={p._id}>{p.name}</option>
                     ))}
                   </select>
                 </div>
               </div>
 
-              <div className="text-left space-y-1">
-                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Volume Quantity (Square Feet)</label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={quoteForm.quantity}
-                  onChange={handleInputChange}
-                  placeholder="Estimated volume needed in square feet"
-                  required
-                  min="1"
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-dark-800 bg-white dark:bg-dark-900 text-sm focus:outline-none focus:border-primary-500 dark:text-white"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-left">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Area (Square Feet)</label>
+                  <input
+                    type="number"
+                    name="area"
+                    value={quoteForm.area}
+                    onChange={handleInputChange}
+                    placeholder="Estimated area needed in square feet"
+                    required
+                    min="1"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-dark-800 bg-white dark:bg-dark-900 text-sm focus:outline-none focus:border-primary-500 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Quantity (Units / Pieces)</label>
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={quoteForm.quantity}
+                    onChange={handleInputChange}
+                    placeholder="Estimated pieces needed"
+                    required
+                    min="1"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-dark-800 bg-white dark:bg-dark-900 text-sm focus:outline-none focus:border-primary-500 dark:text-white"
+                  />
+                </div>
               </div>
 
               <div className="text-left space-y-1">

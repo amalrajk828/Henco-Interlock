@@ -12,18 +12,50 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Configure Multer Cloudinary Storage
-const storage = new CloudinaryStorage({
+// Configure Products Storage
+const productStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'henco-interlock/products',
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-    transformation: [{ quality: 'auto', fetch_format: 'auto' }], // Auto image optimization
+    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
   },
 });
 
-// Set limits: 5MB max
-export const upload = multer({
-  storage: storage,
+export const uploadProducts = multer({
+  storage: productStorage,
   limits: { fileSize: 5 * 1024 * 1024 },
 });
+
+// Configure Projects Storage
+const projectStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'henco-interlock/projects',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+  },
+});
+
+export const uploadProjects = multer({
+  storage: projectStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+// Configure Testimonials Storage
+const testimonialStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'henco-interlock/testimonials',
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
+    transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+  },
+});
+
+export const uploadTestimonials = multer({
+  storage: testimonialStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+// Deprecated fallback for backward compatibility
+export const upload = uploadProducts;

@@ -51,7 +51,7 @@ api.interceptors.response.use(
 export const getImageUrl = (image) => {
   if (!image) return '';
   if (typeof image === 'object') {
-    return image.url || image.imageUrl || '';
+    return image.imageUrl || image.url || '';
   }
   if (typeof image === 'string') {
     if (image.startsWith('http://') || image.startsWith('https://')) return image;
