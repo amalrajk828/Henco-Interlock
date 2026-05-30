@@ -35,25 +35,36 @@ const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(',').map(o => o.trim()).filter(Boolean) 
   : [];
 
-app.use(cors({
+// Regular expression to match localhost with any port (http/https)
+const localhostRegex = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
+
+// Regular expression to match any Vercel domain or Vercel preview domain (*.vercel.app)
+const vercelRegex = /^https:\/\/([a-zA-Z0-9-]+\.)*vercel\.app$/;
+
+const corsOptions = {
   origin: function (origin, callback) {
     // Allow non-browser requests (like mobile app triggers, curl, postman)
     if (!origin) return callback(null, true);
     
-    // Auto-match localhost origins dynamically on any port during development
-    const isLocalhost = /^https?:\/\/localhost(:\d+)?$/.test(origin) || /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin);
+    const isLocalhost = localhostRegex.test(origin);
+    const isVercel = vercelRegex.test(origin);
+    const isAllowedCustom = allowedOrigins.includes(origin);
     
-    if (isLocalhost || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
+    if (isLocalhost || isVercel || isAllowedCustom) {
       return callback(null, true);
     } else {
-      return callback(new Error('CORS Policy: Access denied from this origin.'));
+      console.warn(`[CORS Blocked] Access denied for origin: ${origin}`);
+      return callback(null, false); // Block CORS header inclusion without throwing server error
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200, // Support older browser engines for preflight requests
-}));
+  optionsSuccessStatus: 200 // Support older browser engines for preflight requests
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle preflight OPTIONS requests for all routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
