@@ -4,6 +4,41 @@ import { useSettings } from '../../context/SettingsContext.jsx';
 import api from '../../services/api.js';
 import { Phone, Mail, MapPin, Clock, Send, MessageSquare, Facebook, Instagram, Linkedin } from 'lucide-react';
 
+const getEmbedMapUrl = (url) => {
+  if (!url) return '';
+  if (url.includes('/embed') || url.includes('output=embed')) {
+    return url;
+  }
+  
+  try {
+    if (url.includes('/place/')) {
+      const parts = url.split('/place/');
+      if (parts[1]) {
+        const queryPart = parts[1].split('/')[0];
+        const decodedQuery = decodeURIComponent(queryPart).replace(/\+/g, ' ');
+        return `https://maps.google.com/maps?q=${encodeURIComponent(decodedQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+      }
+    }
+    
+    if (url.includes('google.com/maps')) {
+      const urlObj = new URL(url);
+      const qParam = urlObj.searchParams.get('q') || urlObj.searchParams.get('query');
+      if (qParam) {
+        return `https://maps.google.com/maps?q=${encodeURIComponent(qParam)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+      }
+      
+      const geoMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      if (geoMatch && geoMatch[1] && geoMatch[2]) {
+        return `https://maps.google.com/maps?q=${geoMatch[1]},${geoMatch[2]}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse map url:', e.message);
+  }
+
+  return `https://maps.google.com/maps?q=${encodeURIComponent(url)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+};
+
 const Contact = () => {
   const { settings } = useSettings();
   const navigate = useNavigate();
@@ -14,6 +49,7 @@ const Contact = () => {
     phone: '',
     email: '',
     productInterested: '',
+    area: '',
     quantity: '',
     message: '',
   });
@@ -41,8 +77,8 @@ const Contact = () => {
     e.preventDefault();
     setError('');
 
-    const { name, phone, email, productInterested, quantity } = form;
-    if (!name || !phone || !email || !productInterested || !quantity) {
+    const { name, phone, email, productInterested, area, quantity } = form;
+    if (!name || !phone || !email || !productInterested || !area || !quantity) {
       setError('Please fill in all required fields.');
       return;
     }
@@ -56,6 +92,7 @@ const Contact = () => {
           phone: '',
           email: '',
           productInterested: '',
+          area: '',
           quantity: '',
           message: '',
         });
@@ -230,18 +267,33 @@ const Contact = () => {
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Quantity Volume (Sq Ft)</label>
-                <input
-                  type="number"
-                  name="quantity"
-                  value={form.quantity}
-                  onChange={handleInputChange}
-                  placeholder="Estimated square footage needed"
-                  required
-                  min="1"
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-dark-800 bg-slate-50 dark:bg-dark-950 text-xs focus:outline-none focus:border-primary-500 text-gray-850 dark:text-white"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Area (Sq Ft)</label>
+                  <input
+                    type="number"
+                    name="area"
+                    value={form.area}
+                    onChange={handleInputChange}
+                    placeholder="Estimated square footage"
+                    required
+                    min="1"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-dark-800 bg-slate-50 dark:bg-dark-950 text-xs focus:outline-none focus:border-primary-500 text-gray-850 dark:text-white"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gray-650 dark:text-gray-400 uppercase tracking-wider">Quantity (Units / Pieces)</label>
+                  <input
+                    type="number"
+                    name="quantity"
+                    value={form.quantity}
+                    onChange={handleInputChange}
+                    placeholder="Estimated pieces"
+                    required
+                    min="1"
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-dark-800 bg-slate-50 dark:bg-dark-950 text-xs focus:outline-none focus:border-primary-500 text-gray-850 dark:text-white"
+                  />
+                </div>
               </div>
 
               <div className="space-y-1">
@@ -271,10 +323,10 @@ const Contact = () => {
       </div>
 
       {/* Google Maps Iframe block */}
-      {settings.googleMapsEmbedUrl && (
+      {settings.googleMapsEmbedUrl && getEmbedMapUrl(settings.googleMapsEmbedUrl) && (
         <div className="w-full h-[350px] rounded-3xl overflow-hidden shadow-inner border border-slate-200/50 dark:border-dark-800/50 relative">
           <iframe
-            src={settings.googleMapsEmbedUrl}
+            src={getEmbedMapUrl(settings.googleMapsEmbedUrl)}
             width="100%"
             height="100%"
             style={{ border: 0 }}

@@ -16,8 +16,42 @@ const slugify = (text) => {
 // @route   GET /api/categories
 // @access  Public
 export const getCategories = async (req, res, next) => {
+  const { all } = req.query;
   try {
-    const categories = await Category.find().sort({ name: 1 });
+    if (all === 'true') {
+      const categories = await Category.find().sort({ name: 1 });
+      return res.status(200).json(categories);
+    }
+
+    const categories = await Category.aggregate([
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: 'category',
+          as: 'products',
+        },
+      },
+      {
+        $project: {
+          name: 1,
+          slug: 1,
+          description: 1,
+          image: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          productCount: { $size: '$products' },
+        },
+      },
+      {
+        $match: {
+          productCount: { $gt: 0 },
+        },
+      },
+      {
+        $sort: { name: 1 },
+      },
+    ]);
     res.status(200).json(categories);
   } catch (error) {
     next(error);

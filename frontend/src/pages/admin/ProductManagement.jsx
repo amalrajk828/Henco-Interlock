@@ -33,7 +33,7 @@ const ProductManagement = () => {
       const prodRes = await api.get('/admin/products?limit=100');
       setProducts(prodRes.data.products);
 
-      const catRes = await api.get('/categories');
+      const catRes = await api.get('/categories?all=true');
       setCategories(catRes.data);
     } catch (err) {
       setError('Failed to fetch catalog entries: ' + err.message);

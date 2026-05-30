@@ -50,6 +50,23 @@ const seedDatabase = async () => {
       console.log('✔ Default site settings initialized');
     }
 
+    // 4. Self-Healing Migration: Ensure all Product categories are ObjectIds
+    const products = await mongoose.connection.db.collection('products').find().toArray();
+    for (const prod of products) {
+      if (prod.category && typeof prod.category === 'string') {
+        try {
+          const objectIdCategory = new mongoose.Types.ObjectId(prod.category);
+          await mongoose.connection.db.collection('products').updateOne(
+            { _id: prod._id },
+            { $set: { category: objectIdCategory } }
+          );
+          console.log(`✔ Migrated product "${prod.name}" category reference to native ObjectId`);
+        } catch (err) {
+          console.error(`❌ Failed to migrate product "${prod.name}" category:`, err.message);
+        }
+      }
+    }
+
   } catch (error) {
     console.error('❌ Error seeding database:', error);
   }
