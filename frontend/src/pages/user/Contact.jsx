@@ -4,43 +4,9 @@ import { useSettings } from '../../context/SettingsContext.jsx';
 import api from '../../services/api.js';
 import { Phone, Mail, MapPin, Clock, Send, MessageSquare, Facebook, Instagram, Linkedin } from 'lucide-react';
 
-const getEmbedMapUrl = (url) => {
-  if (!url) return '';
-  if (url.includes('/embed') || url.includes('output=embed')) {
-    return url;
-  }
-  
-  try {
-    if (url.includes('/place/')) {
-      const parts = url.split('/place/');
-      if (parts[1]) {
-        const queryPart = parts[1].split('/')[0];
-        const decodedQuery = decodeURIComponent(queryPart).replace(/\+/g, ' ');
-        return `https://maps.google.com/maps?q=${encodeURIComponent(decodedQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
-      }
-    }
-    
-    if (url.includes('google.com/maps')) {
-      const urlObj = new URL(url);
-      const qParam = urlObj.searchParams.get('q') || urlObj.searchParams.get('query');
-      if (qParam) {
-        return `https://maps.google.com/maps?q=${encodeURIComponent(qParam)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
-      }
-      
-      const geoMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-      if (geoMatch && geoMatch[1] && geoMatch[2]) {
-        return `https://maps.google.com/maps?q=${geoMatch[1]},${geoMatch[2]}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
-      }
-    }
-  } catch (e) {
-    console.error('Failed to parse map url:', e.message);
-  }
-
-  return `https://maps.google.com/maps?q=${encodeURIComponent(url)}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
-};
-
 const Contact = () => {
   const { settings } = useSettings();
+  const mapUrl = settings.googleMapsEmbedUrl;
   const navigate = useNavigate();
 
   const [products, setProducts] = useState([]);
@@ -323,18 +289,18 @@ const Contact = () => {
       </div>
 
       {/* Google Maps Iframe block */}
-      {settings.googleMapsEmbedUrl && getEmbedMapUrl(settings.googleMapsEmbedUrl) && (
+      {mapUrl && (
         <div className="w-full h-[350px] rounded-3xl overflow-hidden shadow-inner border border-slate-200/50 dark:border-dark-800/50 relative">
           <iframe
-            src={getEmbedMapUrl(settings.googleMapsEmbedUrl)}
+            src={mapUrl}
             width="100%"
             height="100%"
             style={{ border: 0 }}
-            allowFullScreen=""
+            allowFullScreen
             loading="lazy"
             title="Google Maps Location Frame"
             referrerPolicy="no-referrer-when-downgrade"
-          ></iframe>
+          />
         </div>
       )}
 
