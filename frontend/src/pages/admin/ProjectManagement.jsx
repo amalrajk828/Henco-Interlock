@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api.js';
+import api, { getImageUrl } from '../../services/api.js';
 import { Layers, Plus, Edit, Trash2, X, ShieldAlert, Calendar } from 'lucide-react';
 
 const ProjectManagement = () => {
@@ -106,7 +106,7 @@ const ProjectManagement = () => {
     // Keep existing images list
     if (editingId) {
       existingImagesList.forEach((img) => {
-        formData.append('existingImages', img);
+        formData.append('existingImages', typeof img === 'object' ? JSON.stringify(img) : img);
       });
     }
 
@@ -201,7 +201,7 @@ const ProjectManagement = () => {
             >
               <div className="aspect-video bg-slate-100 relative overflow-hidden flex items-center justify-center border-b border-slate-200/30">
                 {proj.images?.[0] ? (
-                  <img src={`${api.defaults.baseURL.replace('/api', '')}${proj.images[0]}`} alt={proj.title} className="w-full h-full object-cover" />
+                  <img src={getImageUrl(proj.images?.[0])} alt={proj.title} className="w-full h-full object-cover" />
                 ) : (
                   <Layers className="w-8 h-8 text-gray-400" />
                 )}

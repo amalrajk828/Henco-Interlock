@@ -29,7 +29,10 @@ const productSchema = new mongoose.Schema(
       min: [0, 'Price must be positive'],
     },
     images: {
-      type: [String],
+      type: [{
+        url: { type: String, required: true },
+        publicId: { type: String, required: true }
+      }],
       required: [true, 'At least one product image is required'],
     },
     colors: {

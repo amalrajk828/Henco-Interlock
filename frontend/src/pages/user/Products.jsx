@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSettings } from '../../context/SettingsContext.jsx';
-import api from '../../services/api.js';
+import api, { getImageUrl } from '../../services/api.js';
 import { Search, Filter, SlidersHorizontal, Info, X, MessageSquare, Truck, AlertTriangle } from 'lucide-react';
 
 const Products = () => {
@@ -262,7 +262,7 @@ const Products = () => {
                   <div className="relative aspect-video w-full overflow-hidden bg-slate-200 flex items-center justify-center">
                     {prod.images && prod.images.length > 0 ? (
                       <img
-                        src={`${api.defaults.baseURL.replace('/api', '')}${prod.images[0]}`}
+                        src={getImageUrl(prod.images?.[0])}
                         alt={prod.name}
                         className="h-full w-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
@@ -348,7 +348,7 @@ const Products = () => {
             <div className="md:w-1/2 bg-slate-100 relative max-h-[300px] md:max-h-full overflow-hidden flex items-center justify-center">
               {selectedProduct.images && selectedProduct.images.length > 0 ? (
                 <img
-                  src={`${api.defaults.baseURL.replace('/api', '')}${selectedProduct.images[0]}`}
+                  src={getImageUrl(selectedProduct.images?.[0])}
                   alt={selectedProduct.name}
                   className="h-full w-full object-cover"
                 />

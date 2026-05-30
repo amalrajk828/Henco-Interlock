@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api.js';
+import api, { getImageUrl } from '../../services/api.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Users, Search, Ban, Check, Trash2, Key, X, ShieldAlert, Loader2, Pencil, UserPlus, ShieldCheck, History } from 'lucide-react';
 
@@ -419,7 +419,7 @@ const UserManagement = () => {
                     <td className="px-6 py-4">
                       <div className="w-10 h-10 rounded-full bg-primary-100 dark:bg-dark-800 border border-slate-200/40 text-primary-650 flex items-center justify-center font-bold text-sm">
                         {item.profilePicture ? (
-                          <img src={`${api.defaults.baseURL.replace('/api', '')}${item.profilePicture}`} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                          <img src={getImageUrl(item.profilePicture)} alt="Avatar" className="w-full h-full object-cover rounded-full" />
                         ) : (
                           item.name[0]
                         )}

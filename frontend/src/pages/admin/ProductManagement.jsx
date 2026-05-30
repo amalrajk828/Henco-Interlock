@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api.js';
+import api, { getImageUrl } from '../../services/api.js';
 import { Blocks, Plus, Edit, Trash2, Check, X, ShieldAlert, Sparkles } from 'lucide-react';
 
 const ProductManagement = () => {
@@ -133,7 +133,7 @@ const ProductManagement = () => {
     // Append existing images if editing
     if (editingId) {
       existingImagesList.forEach((img) => {
-        formData.append('existingImages', img);
+        formData.append('existingImages', typeof img === 'object' ? JSON.stringify(img) : img);
       });
     }
 
@@ -229,7 +229,7 @@ const ProductManagement = () => {
                       <div className="w-16 h-10 rounded-lg overflow-hidden bg-slate-150 flex items-center justify-center border border-slate-200/40">
                         {prod.images?.[0] ? (
                           <img
-                            src={`${api.defaults.baseURL.replace('/api', '')}${prod.images[0]}`}
+                            src={getImageUrl(prod.images?.[0])}
                             alt={prod.name}
                             className="h-full w-full object-cover"
                             onError={(e) => {
@@ -438,7 +438,7 @@ const ProductManagement = () => {
                   <div className="flex flex-wrap gap-2">
                     {existingImagesList.map((img, i) => (
                       <div key={i} className="relative w-16 h-10 rounded overflow-hidden border border-slate-200">
-                        <img src={`${api.defaults.baseURL.replace('/api', '')}${img}`} alt="existing" className="w-full h-full object-cover" />
+                        <img src={getImageUrl(img)} alt="existing" className="w-full h-full object-cover" />
                         <button
                           type="button"
                           onClick={() => setExistingImagesList(existingImagesList.filter((x, index) => index !== i))}

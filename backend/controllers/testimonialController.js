@@ -1,5 +1,6 @@
 import Testimonial from '../models/Testimonial.js';
 import ActivityLog from '../models/ActivityLog.js';
+import { deleteImageFromCloudinary } from '../utils/cloudinary.js';
 
 // @desc    Get all approved testimonials
 // @route   GET /api/testimonials
@@ -30,7 +31,7 @@ export const createTestimonial = async (req, res, next) => {
       role: role || '',
       review,
       rating: Number(rating),
-      image: image || '',
+      image: typeof image === 'object' && image.url ? image : { url: image || '', publicId: 'legacy' },
       isApproved: true, // Auto-approve for local demo, can be toggled by admin
     });
 
@@ -59,7 +60,9 @@ export const updateTestimonial = async (req, res, next) => {
     if (role !== undefined) testimonial.role = role;
     if (review) testimonial.review = review;
     if (rating !== undefined) testimonial.rating = Number(rating);
-    if (image !== undefined) testimonial.image = image;
+    if (image !== undefined) {
+      testimonial.image = typeof image === 'object' && image.url ? image : { url: image || '', publicId: 'legacy' };
+    }
     if (isApproved !== undefined) testimonial.isApproved = isApproved;
 
     const updatedTestimonial = await testimonial.save();
@@ -88,6 +91,11 @@ export const deleteTestimonial = async (req, res, next) => {
 
     if (!testimonial) {
       return res.status(404).json({ message: 'Testimonial not found' });
+    }
+
+    // Delete image from Cloudinary
+    if (testimonial.image && testimonial.image.publicId) {
+      await deleteImageFromCloudinary(testimonial.image.publicId);
     }
 
     await Testimonial.findByIdAndDelete(id);

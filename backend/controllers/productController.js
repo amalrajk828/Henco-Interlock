@@ -1,6 +1,7 @@
 import Product from '../models/Product.js';
 import Category from '../models/Category.js';
 import ActivityLog from '../models/ActivityLog.js';
+import { deleteImageFromCloudinary } from '../utils/cloudinary.js';
 
 // Helper to generate slug
 const slugify = (text) => {
@@ -147,9 +148,16 @@ export const createProduct = async (req, res, next) => {
     // Process files
     let productImages = [];
     if (req.files && req.files.length > 0) {
-      productImages = req.files.map((file) => `/uploads/${file.filename}`);
+      productImages = req.files.map((file) => ({
+        url: file.path,
+        publicId: file.filename,
+      }));
     } else if (manualImages) {
-      productImages = Array.isArray(manualImages) ? manualImages : [manualImages];
+      const imagesArray = Array.isArray(manualImages) ? manualImages : [manualImages];
+      productImages = imagesArray.map((img) => ({
+        url: img,
+        publicId: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy',
+      }));
     }
 
     if (productImages.length === 0) {
@@ -248,13 +256,38 @@ export const updateProduct = async (req, res, next) => {
     // Process images
     let productImages = [];
     if (existingImages) {
-      productImages = Array.isArray(existingImages)
-        ? existingImages
-        : [existingImages];
+      const existingArray = Array.isArray(existingImages) ? existingImages : [existingImages];
+      productImages = existingArray.map((img) => {
+        if (typeof img === 'object' && img.url) return img;
+        if (typeof img === 'string') {
+          try {
+            const parsed = JSON.parse(img);
+            if (parsed.url) return parsed;
+          } catch (e) {}
+          return {
+            url: img,
+            publicId: img.includes('cloudinary') ? img.split('/').pop().split('.')[0] : 'legacy'
+          };
+        }
+        return img;
+      });
+    }
+
+    // Identify and delete removed images from Cloudinary
+    const newPublicIds = productImages.map(img => img.publicId).filter(Boolean);
+    if (product.images && product.images.length > 0) {
+      for (const oldImg of product.images) {
+        if (oldImg.publicId && !newPublicIds.includes(oldImg.publicId)) {
+          await deleteImageFromCloudinary(oldImg.publicId);
+        }
+      }
     }
 
     if (req.files && req.files.length > 0) {
-      const newImages = req.files.map((file) => `/uploads/${file.filename}`);
+      const newImages = req.files.map((file) => ({
+        url: file.path,
+        publicId: file.filename,
+      }));
       productImages = [...productImages, ...newImages];
     }
 
@@ -289,6 +322,15 @@ export const deleteProduct = async (req, res, next) => {
 
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
+    }
+
+    // Delete images from Cloudinary
+    if (product.images && product.images.length > 0) {
+      for (const img of product.images) {
+        if (img.publicId) {
+          await deleteImageFromCloudinary(img.publicId);
+        }
+      }
     }
 
     await Product.findByIdAndDelete(id);

@@ -17,11 +17,7 @@ import { notFound, errorHandler } from './middleware/errorMiddleware.js';
 // Load environmental parameters
 dotenv.config();
 
-// Create uploads directory if not present
-const uploadsPath = path.resolve('uploads');
-if (!fs.existsSync(uploadsPath)) {
-  fs.mkdirSync(uploadsPath, { recursive: true });
-}
+
 
 const app = express();
 
@@ -54,8 +50,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
-// Statically serve uploaded attachments
-app.use('/uploads', express.static(uploadsPath));
+
 
 // Health Check API
 app.get('/api/health', (req, res) => {

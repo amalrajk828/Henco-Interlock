@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext.jsx';
-import api from '../../services/api.js';
+import api, { getImageUrl } from '../../services/api.js';
 import { User, ShieldAlert, Key, Save, Bell, Loader2 } from 'lucide-react';
 
 const ProfileManagement = () => {
@@ -172,7 +172,11 @@ const ProfileManagement = () => {
         <div className="lg:col-span-4 bg-white dark:bg-dark-900 border border-slate-200/50 dark:border-dark-800/50 p-6 rounded-3xl text-center space-y-4 shadow-sm">
           <div className="w-24 h-24 rounded-full bg-primary-50 dark:bg-dark-800 border-2 border-primary-500/20 text-primary-600 flex items-center justify-center font-extrabold text-3xl mx-auto shadow shadow-primary-500/10">
             {form.profilePicture ? (
-              <img src={`${api.defaults.baseURL.replace('/api', '')}${form.profilePicture}`} alt="Profile" className="w-full h-full object-cover rounded-full" />
+              <img
+                src={getImageUrl(form.profilePicture)}
+                alt="Profile"
+                className="w-full h-full object-cover rounded-full"
+              />
             ) : (
               form.name[0] || 'A'
             )}

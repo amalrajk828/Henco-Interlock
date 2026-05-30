@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api.js';
+import api, { getImageUrl } from '../../services/api.js';
 import { Filter, Calendar, Award, User, RefreshCw, Layers } from 'lucide-react';
 
 const Projects = () => {
@@ -108,7 +108,7 @@ const Projects = () => {
                 <div className="relative aspect-video w-full overflow-hidden bg-slate-100 flex items-center justify-center">
                   {displayImage ? (
                     <img
-                      src={`${api.defaults.baseURL.replace('/api', '')}${displayImage}`}
+                      src={getImageUrl(displayImage)}
                       alt={proj.title}
                       className="h-full w-full object-cover transition-all duration-500"
                       onError={(e) => {

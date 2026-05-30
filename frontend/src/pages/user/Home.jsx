@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useSettings } from '../../context/SettingsContext.jsx';
-import api from '../../services/api.js';
+import api, { getImageUrl } from '../../services/api.js';
 import { ArrowRight, Star, ShieldCheck, Truck, Users, Settings, Blocks, Sparkles, MessageSquare } from 'lucide-react';
 
 const Home = () => {
@@ -282,7 +282,7 @@ const Home = () => {
                   <div className="relative aspect-video w-full overflow-hidden bg-slate-200 flex items-center justify-center">
                     {prod.images && prod.images.length > 0 ? (
                       <img
-                        src={`${api.defaults.baseURL.replace('/api', '')}${prod.images[0]}`}
+                        src={getImageUrl(prod.images?.[0])}
                         alt={prod.name}
                         className="h-full w-full object-cover transform group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => {
