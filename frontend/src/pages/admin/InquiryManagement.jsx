@@ -206,70 +206,151 @@ const InquiryManagement = () => {
           <p className="text-xs text-gray-500 dark:text-gray-400 max-w-sm mx-auto mt-2">No client messages align with the parameters.</p>
         </div>
       ) : (
-        <div className="bg-white dark:bg-dark-900 border border-slate-200/50 dark:border-dark-800/50 rounded-3xl shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-slate-50 dark:bg-dark-950 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-slate-100 dark:border-dark-800">
-                <tr>
-                  <th className="px-6 py-4">Tracking ID</th>
-                  <th className="px-6 py-4">Client Detail</th>
-                  <th className="px-6 py-4">Product Interest</th>
-                  <th className="px-6 py-4">Volume / Area</th>
-                  <th className="px-6 py-4">Submitted</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4 text-center">Review</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-dark-800">
-                {inquiries.map((item) => (
-                  <tr key={item._id} className="hover:bg-slate-50/50 dark:hover:bg-dark-900/50">
-                    <td className="px-6 py-4 font-mono font-bold text-primary-600 dark:text-primary-400">
-                      {item.trackingId}
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="space-y-0.5">
-                        <span className="font-bold text-gray-950 dark:text-white block leading-tight">{item.name}</span>
-                        <span className="text-[10px] text-gray-450 block">{item.phone}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-xs font-semibold text-gray-650 dark:text-gray-300">
-                      {item.productInterested?.name || 'Custom Paver'}
-                    </td>
-                    <td className="px-6 py-4 text-xs">
-                      <div className="space-y-0.5 text-left">
-                        <span className="font-bold text-gray-950 dark:text-white block leading-tight">{item.area || 0} Sq Ft</span>
-                        <span className="text-[10px] text-gray-450 block">{item.quantity || 0} units</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-xs text-gray-400">
-                      {new Date(item.createdAt).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded ${
-                        item.status === 'Pending'
-                          ? 'bg-amber-100 text-amber-800'
-                          : item.status === 'Contacted'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-emerald-100 text-emerald-800'
-                      }`}>
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-center">
-                        <button
-                          onClick={() => handleOpenReview(item)}
-                          className="p-2 bg-slate-100 hover:bg-primary-600 hover:text-white dark:bg-dark-800 dark:hover:bg-primary-500 rounded-lg text-gray-600 dark:text-gray-300 transition-smooth"
-                          title="Review Inquiry details"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
+        <div className="space-y-6">
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white dark:bg-dark-900 border border-slate-200/50 dark:border-dark-800/50 rounded-3xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 dark:bg-dark-950 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 border-b border-slate-100 dark:border-dark-800 sticky top-0 z-10">
+                  <tr>
+                    <th className="px-6 py-4">Tracking ID</th>
+                    <th className="px-6 py-4">Client Detail</th>
+                    <th className="px-6 py-4">Product Interest</th>
+                    <th className="px-6 py-4">Volume / Area</th>
+                    <th className="px-6 py-4">Submitted</th>
+                    <th className="px-6 py-4">Status</th>
+                    <th className="px-6 py-4 text-center">Review</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-dark-800">
+                  {inquiries.map((item) => (
+                    <tr key={item._id} className="hover:bg-slate-50/50 dark:hover:bg-dark-900/50">
+                      <td className="px-6 py-4 font-mono font-bold text-primary-600 dark:text-primary-400">
+                        {item.trackingId}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="space-y-0.5">
+                          <span className="font-bold text-gray-950 dark:text-white block leading-tight truncate max-w-xs">{item.name}</span>
+                          <span className="text-[10px] text-gray-450 block truncate">{item.phone}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-xs font-semibold text-gray-650 dark:text-gray-300 truncate max-w-[150px]">
+                        {item.productInterested?.name || 'Custom Paver'}
+                      </td>
+                      <td className="px-6 py-4 text-xs">
+                        <div className="space-y-0.5 text-left">
+                          <span className="font-bold text-gray-950 dark:text-white block leading-tight">{item.area || 0} Sq Ft</span>
+                          <span className="text-[10px] text-gray-450 block">{item.quantity || 0} units</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-xs text-gray-400">
+                        {new Date(item.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded ${
+                          item.status === 'Pending'
+                            ? 'bg-amber-100 text-amber-800'
+                            : item.status === 'Contacted'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-emerald-100 text-emerald-800'
+                        }`}>
+                          {item.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center">
+                          <button
+                            onClick={() => handleOpenReview(item)}
+                            className="p-2 bg-slate-100 hover:bg-primary-600 hover:text-white dark:bg-dark-800 dark:hover:bg-primary-500 rounded-lg text-gray-600 dark:text-gray-300 transition-smooth"
+                            title="Review Inquiry details"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Mobile Card-Based Listings */}
+          <div className="block md:hidden space-y-4">
+            {inquiries.map((item) => (
+              <div
+                key={item._id}
+                className="bg-white dark:bg-dark-900 border border-slate-200/50 dark:border-dark-800/50 rounded-3xl p-5 shadow-sm space-y-4 animate-fade-in"
+              >
+                {/* Header: Tracking ID & Status */}
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-dark-800">
+                  <span className="font-mono font-bold text-xs text-primary-600 dark:text-primary-400">
+                    {item.trackingId}
+                  </span>
+                  <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full ${
+                    item.status === 'Pending'
+                      ? 'bg-amber-50 text-amber-700 border border-amber-200/50'
+                      : item.status === 'Contacted'
+                      ? 'bg-blue-50 text-blue-700 border border-blue-200/50'
+                      : 'bg-emerald-50 text-emerald-700 border border-emerald-200/50'
+                  }`}>
+                    {item.status}
+                  </span>
+                </div>
+
+                {/* Client & Product details */}
+                <div className="space-y-2 text-left text-xs">
+                  <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-dark-950 p-3 rounded-2xl border border-slate-100 dark:border-dark-850">
+                    <div>
+                      <span className="block text-[8px] text-gray-400 uppercase font-bold tracking-wider">Client Name</span>
+                      <span className="font-bold text-gray-900 dark:text-white block leading-tight truncate">{item.name}</span>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] text-gray-400 uppercase font-bold tracking-wider font-mono">Date Submitted</span>
+                      <span className="text-gray-650 dark:text-gray-300 block">{new Date(item.createdAt).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <span className="block text-[8px] text-gray-400 uppercase font-bold tracking-wider">Product Interested</span>
+                    <span className="font-bold text-gray-800 dark:text-gray-200 block truncate">{item.productInterested?.name || 'Custom Paver'}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="block text-[8px] text-gray-400 uppercase font-bold tracking-wider">Required Volume</span>
+                      <span className="font-semibold text-primary-600 dark:text-primary-400 block">{item.area || 0} Sq Ft ({item.quantity || 0} units)</span>
+                    </div>
+                    <div>
+                      <span className="block text-[8px] text-gray-400 uppercase font-bold tracking-wider">Client Contacts</span>
+                      <span className="text-gray-650 dark:text-gray-300 block truncate">{item.phone}</span>
+                      <span className="text-gray-650 dark:text-gray-300 block truncate">{item.email}</span>
+                    </div>
+                  </div>
+
+                  {/* Message Preview */}
+                  {item.message && (
+                    <div className="space-y-1">
+                      <span className="block text-[8px] text-gray-400 uppercase font-bold tracking-wider">Client Message</span>
+                      <p className="p-3 bg-slate-50 dark:bg-dark-950 rounded-xl border border-slate-100 text-[11px] text-gray-650 dark:text-gray-350 truncate line-clamp-1">
+                        "{item.message}"
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Review & Reply Button */}
+                <div className="pt-3 border-t border-slate-100 dark:border-dark-800">
+                  <button
+                    onClick={() => handleOpenReview(item)}
+                    className="w-full py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition-smooth flex items-center justify-center space-x-1.5 min-h-[40px] shadow"
+                  >
+                    <Eye className="w-4.5 h-4.5" />
+                    <span>Review &amp; Log Reply</span>
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Pagination */}
