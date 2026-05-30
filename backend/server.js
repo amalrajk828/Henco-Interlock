@@ -30,41 +30,26 @@ if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev'));
 }
 
-// Dynamic CORS Configuration
-const allowedOrigins = process.env.FRONTEND_URL 
-  ? process.env.FRONTEND_URL.split(',').map(o => o.trim()).filter(Boolean) 
-  : [];
+// CORS Debugging Middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log(`[CORS Debug] Method: ${req.method} | Origin: ${origin || 'No Origin'} | Path: ${req.path}`);
+  if (req.method === 'OPTIONS') {
+    console.log(`[CORS Preflight] Preflight request for path: ${req.path}`);
+  }
+  next();
+});
 
-// Regular expression to match localhost with any port (http/https)
-const localhostRegex = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
-
-// Regular expression to match any Vercel domain or Vercel preview domain (*.vercel.app)
-const vercelRegex = /^https:\/\/([a-zA-Z0-9-]+\.)*vercel\.app$/;
-
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow non-browser requests (like mobile app triggers, curl, postman)
-    if (!origin) return callback(null, true);
-    
-    const isLocalhost = localhostRegex.test(origin);
-    const isVercel = vercelRegex.test(origin);
-    const isAllowedCustom = allowedOrigins.includes(origin);
-    
-    if (isLocalhost || isVercel || isAllowedCustom) {
-      return callback(null, true);
-    } else {
-      console.warn(`[CORS Blocked] Access denied for origin: ${origin}`);
-      return callback(null, false); // Block CORS header inclusion without throwing server error
-    }
-  },
+// Production Permissive CORS Configuration
+app.use(cors({
+  origin: true,
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  optionsSuccessStatus: 200 // Support older browser engines for preflight requests
-};
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Handle preflight OPTIONS requests for all routes
+app.options("*", cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
